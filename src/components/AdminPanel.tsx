@@ -742,7 +742,7 @@ export default function AdminPanel({
             {/* View Public Page */}
             <a
               id="view-public-page-btn"
-              href="/"
+              href={publicCode ? `/?codigo=${publicCode}` : '/'}
               target="_blank"
               rel="noopener noreferrer"
               className="px-3.5 py-2 bg-emerald-600 border border-emerald-500 hover:bg-emerald-500 text-white rounded-xl text-xs font-display font-bold flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer mr-1"
