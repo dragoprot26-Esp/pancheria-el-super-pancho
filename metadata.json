@@ -1,0 +1,6 @@
+{
+  "name": "Panchería El Súper Pancho",
+  "description": "Aplicación web progresiva (PWA) para una panchería, con menú interactivo para clientes, carrito inteligente y panel de administración avanzado para Jefes con métricas en tiempo real, gestión de stock y descarga de reportes contables en PDF.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
