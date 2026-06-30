@@ -14,6 +14,8 @@ interface CheckoutDialogProps {
   pickupEnabled: boolean; // Managed by admin settings
   deliveryEnabled: boolean; // Managed by admin settings
   publicCode: string; // código del local (tenant) para registrar el pedido
+  localAddress?: string; // dirección del local (para retiro)
+  localMapsUrl?: string; // link a Google Maps del local
 }
 
 export default function CheckoutDialog({
@@ -25,7 +27,9 @@ export default function CheckoutDialog({
   onClearCart,
   pickupEnabled,
   deliveryEnabled,
-  publicCode
+  publicCode,
+  localAddress,
+  localMapsUrl
 }: CheckoutDialogProps) {
   const [deliveryType, setDeliveryType] = useState<DeliveryType>('delivery');
   const [name, setName] = useState('');
@@ -271,6 +275,27 @@ export default function CheckoutDialog({
                     <p className="text-[10px] text-brand-red font-semibold text-center mt-1">
                       ⚠️ Todos los métodos de entrega están inhabilitados temporalmente.
                     </p>
+                  )}
+
+                  {/* Dirección del local para retiro */}
+                  {deliveryType === 'pickup' && (localAddress || localMapsUrl) && (
+                    <div className="mt-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-start gap-2.5">
+                      <Store size={16} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 space-y-1.5">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Retirás en</p>
+                        {localAddress && <p className="text-xs text-stone-700 font-semibold">{localAddress}</p>}
+                        {localMapsUrl && (
+                          <a
+                            href={localMapsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-800 underline"
+                          >
+                            🗺️ Ver ubicación en Google Maps
+                          </a>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
 
