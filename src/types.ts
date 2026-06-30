@@ -74,6 +74,8 @@ export interface AdminSettings {
   reviews?: Review[];
   categories?: CustomCategory[];
   adminTheme?: string;
+  address?: string;
+  mapsUrl?: string;
 }
 
 export interface SalesMetrics {
