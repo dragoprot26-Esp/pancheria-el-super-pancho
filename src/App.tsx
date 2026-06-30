@@ -61,9 +61,15 @@ export default function App() {
   };
 
   // 1) Vidriera pública por ?codigo=  (menú del local, sin login)
+  //    Recuerda el código en este dispositivo, así no hace falta repetirlo.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const code = (params.get('codigo') || params.get('local') || '').trim().toUpperCase();
+    const urlCode = (params.get('codigo') || params.get('local') || '').trim().toUpperCase();
+    if (urlCode) { try { localStorage.setItem('panc_code', urlCode); } catch (e) {} }
+    let stored = '';
+    try { stored = (localStorage.getItem('panc_code') || '').trim().toUpperCase(); } catch (e) {}
+    // Si hay sesión de admin, no forzamos la vista pública (que restaure el panel).
+    const code = urlCode || (!estaLogueado() ? stored : '');
     if (!code) return;
     setIsPublicView(true);
     setCloudCode(code);
@@ -257,6 +263,11 @@ export default function App() {
   else if (fontName === 'JetBrains Mono') fontStyleFamily = "'JetBrains Mono', monospace";
 
   const publicUrl = cloudCode ? `${window.location.origin}/?codigo=${cloudCode}` : window.location.origin;
+
+  const localAddress = (settings.address || '').trim();
+  const mapsHref = (settings.mapsUrl || '').trim()
+    ? (settings.mapsUrl || '').trim()
+    : (localAddress ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(localAddress)}` : '');
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9F5]">
@@ -540,7 +551,29 @@ export default function App() {
             <p className="text-[11px] text-stone-400">Ingredientes frescos auditados diariamente por los dueños.</p>
           </div>
         </div>
-        
+
+        {(localAddress || mapsHref) && (
+          <div className="max-w-md mx-auto flex flex-col items-center gap-3 pt-2">
+            {localAddress && (
+              <p className="flex items-center gap-1.5 text-stone-700 font-semibold text-sm">
+                <span>📍</span>
+                <span>{localAddress}</span>
+              </p>
+            )}
+            {mapsHref && (
+              <a
+                href={mapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 bg-brand-orange hover:bg-brand-orange/90 text-white px-5 py-2.5 rounded-full text-xs font-display font-extrabold shadow-sm transition-all active:scale-95"
+              >
+                <span>🗺️</span>
+                <span>Cómo llegar al local</span>
+              </a>
+            )}
+          </div>
+        )}
+
         <p className="pt-4 border-t border-stone-50 text-[11px]">
           © {new Date().getFullYear()} {settings.brandName || 'La Panchería del Jefe'}. Todos los derechos reservados. Hecho con pasión culinaria.
         </p>
@@ -565,6 +598,8 @@ export default function App() {
         pickupEnabled={settings.pickupEnabled}
         deliveryEnabled={settings.deliveryEnabled}
         publicCode={cloudCode}
+        localAddress={localAddress}
+        localMapsUrl={mapsHref}
       />
 
       {/* Administrative login portal modal */}
