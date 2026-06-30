@@ -75,6 +75,7 @@ export default function AdminPanel({
   const [themeOpeningHours, setThemeOpeningHours] = useState('');
   const [themeAddress, setThemeAddress] = useState('');
   const [themeMapsUrl, setThemeMapsUrl] = useState('');
+  const [themeLogoImage, setThemeLogoImage] = useState('');
   const [themeHeroBadge, setThemeHeroBadge] = useState('');
   const [themeHeroTitle, setThemeHeroTitle] = useState('');
   const [themeHeroDescription, setThemeHeroDescription] = useState('');
@@ -110,6 +111,7 @@ export default function AdminPanel({
       setThemeOpeningHours(settings.openingHours || 'Abierto: 11:30hs a 23:30hs');
       setThemeAddress(settings.address || '');
       setThemeMapsUrl(settings.mapsUrl || '');
+      setThemeLogoImage(settings.logoImage || '');
       setThemeHeroBadge(settings.heroBadge || 'SABOR ARGENTINO PREMIUM');
       setThemeHeroTitle(settings.heroTitle || 'Panchos cargados de verdad,\ncomo a vos te gustan.');
       setThemeHeroDescription(settings.heroDescription || 'Disfrutá de panes brioche artesanales, aderezos importados, lluvia interminable de papitas pay crujientes y combinaciones brutales de quesos fundidos. Pedí y retirá rápido en nuestro local o solicitalo directo a tu casa.');
@@ -275,6 +277,7 @@ export default function AdminPanel({
         openingHours: overrideParams?.openingHours !== undefined ? overrideParams.openingHours : themeOpeningHours,
         address: overrideParams?.address !== undefined ? overrideParams.address : themeAddress,
         mapsUrl: overrideParams?.mapsUrl !== undefined ? overrideParams.mapsUrl : themeMapsUrl,
+        logoImage: overrideParams?.logoImage !== undefined ? overrideParams.logoImage : themeLogoImage,
         heroBadge: overrideParams?.heroBadge !== undefined ? overrideParams.heroBadge : themeHeroBadge,
         heroTitle: overrideParams?.heroTitle !== undefined ? overrideParams.heroTitle : themeHeroTitle,
         heroDescription: overrideParams?.heroDescription !== undefined ? overrideParams.heroDescription : themeHeroDescription,
@@ -2284,6 +2287,57 @@ export default function AdminPanel({
                           className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-orange focus:outline-none"
                         />
                         <p className="text-[9px] text-stone-400">Si lo dejás vacío, el botón "Cómo llegar" busca tu dirección en el mapa.</p>
+                      </div>
+                    </div>
+
+                    {/* Logo del local (arriba a la izquierda) */}
+                    <div className="pt-3 border-t border-stone-100 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">🖼️ Logo del Local (arriba a la izquierda)</label>
+                        {themeLogoImage && (
+                          <button
+                            type="button"
+                            onClick={() => setThemeLogoImage('')}
+                            className="text-[10px] text-brand-red font-bold hover:underline"
+                          >
+                            Quitar (usar 🌭)
+                          </button>
+                        )}
+                      </div>
+                      <div className="flex gap-4 items-center">
+                        <div className="w-16 h-16 rounded-xl border border-stone-200 bg-white flex-shrink-0 overflow-hidden flex items-center justify-center">
+                          {themeLogoImage ? (
+                            <img src={themeLogoImage} alt="Logo" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-3xl">🌭</span>
+                          )}
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                if (file.size > 2 * 1024 * 1024) {
+                                  alert('La imagen es demasiado grande. El límite es de 2MB.');
+                                  return;
+                                }
+                                const reader = new FileReader();
+                                reader.onloadend = () => setThemeLogoImage(reader.result as string);
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                            className="block w-full text-xs text-stone-500 file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:font-semibold file:bg-stone-900 file:text-stone-100 hover:file:bg-stone-800 cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={themeLogoImage}
+                            onChange={(e) => setThemeLogoImage(e.target.value)}
+                            placeholder="O pegá una URL de imagen del logo..."
+                            className="w-full bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 text-[10px] focus:ring-1 focus:ring-brand-orange focus:outline-none"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
