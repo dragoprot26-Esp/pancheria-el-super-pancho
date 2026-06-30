@@ -73,6 +73,8 @@ export default function AdminPanel({
   const [themeBrandSubtitle, setThemeBrandSubtitle] = useState('');
   const [themeSupportPhone, setThemeSupportPhone] = useState('');
   const [themeOpeningHours, setThemeOpeningHours] = useState('');
+  const [themeAddress, setThemeAddress] = useState('');
+  const [themeMapsUrl, setThemeMapsUrl] = useState('');
   const [themeHeroBadge, setThemeHeroBadge] = useState('');
   const [themeHeroTitle, setThemeHeroTitle] = useState('');
   const [themeHeroDescription, setThemeHeroDescription] = useState('');
@@ -106,6 +108,8 @@ export default function AdminPanel({
       setThemeBrandSubtitle(settings.brandSubtitle || 'Panes súper tiernos, salchichas premium');
       setThemeSupportPhone(settings.supportPhone || '11 5566-7788');
       setThemeOpeningHours(settings.openingHours || 'Abierto: 11:30hs a 23:30hs');
+      setThemeAddress(settings.address || '');
+      setThemeMapsUrl(settings.mapsUrl || '');
       setThemeHeroBadge(settings.heroBadge || 'SABOR ARGENTINO PREMIUM');
       setThemeHeroTitle(settings.heroTitle || 'Panchos cargados de verdad,\ncomo a vos te gustan.');
       setThemeHeroDescription(settings.heroDescription || 'Disfrutá de panes brioche artesanales, aderezos importados, lluvia interminable de papitas pay crujientes y combinaciones brutales de quesos fundidos. Pedí y retirá rápido en nuestro local o solicitalo directo a tu casa.');
@@ -269,6 +273,8 @@ export default function AdminPanel({
         brandSubtitle: overrideParams?.brandSubtitle !== undefined ? overrideParams.brandSubtitle : themeBrandSubtitle,
         supportPhone: overrideParams?.supportPhone !== undefined ? overrideParams.supportPhone : themeSupportPhone,
         openingHours: overrideParams?.openingHours !== undefined ? overrideParams.openingHours : themeOpeningHours,
+        address: overrideParams?.address !== undefined ? overrideParams.address : themeAddress,
+        mapsUrl: overrideParams?.mapsUrl !== undefined ? overrideParams.mapsUrl : themeMapsUrl,
         heroBadge: overrideParams?.heroBadge !== undefined ? overrideParams.heroBadge : themeHeroBadge,
         heroTitle: overrideParams?.heroTitle !== undefined ? overrideParams.heroTitle : themeHeroTitle,
         heroDescription: overrideParams?.heroDescription !== undefined ? overrideParams.heroDescription : themeHeroDescription,
@@ -2254,6 +2260,30 @@ export default function AdminPanel({
                           placeholder="Abierto: 11:30hs a 23:30hs"
                           className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-orange focus:outline-none"
                         />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">📍 Dirección del Local</label>
+                        <input
+                          type="text"
+                          value={themeAddress}
+                          onChange={(e) => setThemeAddress(e.target.value)}
+                          placeholder="Ej: Av. Rivadavia 2500, CABA"
+                          className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-orange focus:outline-none"
+                        />
+                        <p className="text-[9px] text-stone-400">Se muestra en la carta y en el retiro en local.</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">🗺️ Link de Google Maps (opcional)</label>
+                        <input
+                          type="text"
+                          value={themeMapsUrl}
+                          onChange={(e) => setThemeMapsUrl(e.target.value)}
+                          placeholder="Pegá el link de Google Maps del local"
+                          className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-orange focus:outline-none"
+                        />
+                        <p className="text-[9px] text-stone-400">Si lo dejás vacío, el botón "Cómo llegar" busca tu dirección en el mapa.</p>
                       </div>
                     </div>
                   </div>
