@@ -420,12 +420,6 @@ export default function App() {
               </button>
             ))}
           </div>
-
-          <div className="hidden lg:flex items-center gap-1.5 text-xs text-stone-400 font-bold">
-            <span>¿Salsas gratis? ¡Sí, pedí en las notas!</span>
-            <span className="text-stone-300">|</span>
-            <span className="text-brand-orange">Llegamos a todo Palermo y cercanías 🏍️</span>
-          </div>
         </div>
       </div>
 
