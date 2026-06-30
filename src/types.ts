@@ -76,6 +76,7 @@ export interface AdminSettings {
   adminTheme?: string;
   address?: string;
   mapsUrl?: string;
+  logoImage?: string;
 }
 
 export interface SalesMetrics {
