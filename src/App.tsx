@@ -79,9 +79,12 @@ export default function App() {
     })();
   }, []);
 
-  // 2) Restaurar sesión de admin si ya estaba logueado
+  // 2) Restaurar sesión de admin si ya estaba logueado.
+  //    Si la URL trae ?codigo= es un enlace público (ej: el botón "Ver Carta
+  //    Pública"): mostramos la carta, NO el panel, aunque haya sesión abierta.
   useEffect(() => {
-    if (isPublicView) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('codigo') || params.get('local')) return;
     if (!estaLogueado()) return;
     (async () => {
       const m = await miMembresia();
@@ -91,7 +94,7 @@ export default function App() {
       const remote = await cloudLoad(m.tenant_id);
       if (remote) aplicarDatos(remote, false);
     })();
-  }, [isPublicView]);
+  }, []);
 
   // Login OK (desde AdminLogin): vincula el local y carga/siembra la nube
   const handleLoginSuccess = async (name: string, codigo: string) => {
@@ -116,9 +119,10 @@ export default function App() {
     setCloudCode('');
   };
 
-  // 3) Guardado en la nube (admin) con traer-antes-de-guardar
+  // 3) Guardado en la nube (admin) con traer-antes-de-guardar.
+  //    Si hay admin logueado, estamos en el panel → siempre sincronizamos.
   useEffect(() => {
-    if (!loggedAdmin || !cloudCode || isPublicView) return;
+    if (!loggedAdmin || !cloudCode) return;
     const tmr = setTimeout(async () => {
       const remote = await cloudLoad(cloudCode);
       const remoteOrders = (remote && Array.isArray(remote.orders)) ? remote.orders : [];
@@ -131,7 +135,7 @@ export default function App() {
       });
     }, 1200);
     return () => clearTimeout(tmr);
-  }, [products, orders, settings, collaborators, loggedAdmin, cloudCode, isPublicView]);
+  }, [products, orders, settings, collaborators, loggedAdmin, cloudCode]);
 
   // Aviso sonoro + notificación de pedidos nuevos
   const avisarNuevoPedido = (n: number) => {
@@ -144,7 +148,7 @@ export default function App() {
 
   // 4) Sondeo de pedidos nuevos (campanita) cada 15s
   useEffect(() => {
-    if (!loggedAdmin || !cloudCode || isPublicView) return;
+    if (!loggedAdmin || !cloudCode) return;
     if ('Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission(); } catch (e) {} }
     const iv = setInterval(async () => {
       const remote = await cloudLoad(cloudCode);
@@ -157,7 +161,7 @@ export default function App() {
       });
     }, 15000);
     return () => clearInterval(iv);
-  }, [loggedAdmin, cloudCode, isPublicView]);
+  }, [loggedAdmin, cloudCode]);
 
   // Cart operations
   const handleAddToCart = (product: Product, quantity: number, notes: string) => {
