@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { KeyRound, ShieldAlert, User, Lock, Loader2, Store, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { KeyRound, ShieldAlert, User, Lock, Loader2, Store, Users, Fingerprint } from 'lucide-react';
 import { motion } from 'motion/react';
 import {
   validarLicencia,
   asegurarCuentaSeguraDueno,
   asegurarCuentaSeguraColab,
 } from '../cloud';
+import { bioSupported, bioEnabled, bioEnable, bioLogin } from '../biometric';
 
 interface AdminLoginProps {
   onLoginSuccess: (adminName: string, codigo: string) => void;
@@ -20,6 +21,28 @@ export default function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps)
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Ingreso biométrico (huella / Face ID) en este dispositivo
+  const [bioAvail, setBioAvail] = useState(false);
+  const [bioOn, setBioOn] = useState(false);
+  const [bioCheck, setBioCheck] = useState(false);
+
+  useEffect(() => {
+    bioSupported().then(setBioAvail);
+    setBioOn(bioEnabled());
+  }, []);
+
+  // Login real reutilizable (formulario y huella)
+  const doLogin = async (codigo: string, usuario: string, pass: string, rol: 'admin' | 'collaborator') => {
+    const lic = await validarLicencia(codigo);
+    if (!lic) return { ok: false, msg: 'Código de licencia inválido o vencido.' };
+    const r = rol === 'admin'
+      ? await asegurarCuentaSeguraDueno(usuario, pass, codigo)
+      : await asegurarCuentaSeguraColab(usuario, pass, codigo);
+    if (!r.ok) return { ok: false, msg: r.msg || 'No se pudo iniciar sesión.' };
+    onLoginSuccess(usuario, codigo);
+    return { ok: true };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
@@ -32,23 +55,28 @@ export default function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps)
 
     setLoading(true);
     try {
-      const lic = await validarLicencia(codigo);
-      if (!lic) {
-        setErrorMsg('Código de licencia inválido o vencido.');
-        setLoading(false);
-        return;
+      const r = await doLogin(codigo, usuario, password, role);
+      if (!r.ok) { setErrorMsg(r.msg || 'No se pudo iniciar sesión.'); setLoading(false); return; }
+      if (bioCheck && bioAvail) {
+        try { await bioEnable({ codigo, usuario, password, role }); setBioOn(true); }
+        catch (e) { /* si la huella falla, igual entra */ }
       }
-      const r = role === 'admin'
-        ? await asegurarCuentaSeguraDueno(usuario, password, codigo)
-        : await asegurarCuentaSeguraColab(usuario, password, codigo);
-      if (!r.ok) {
-        setErrorMsg(r.msg || 'No se pudo iniciar sesión.');
-        setLoading(false);
-        return;
-      }
-      onLoginSuccess(usuario, codigo);
     } catch (err: any) {
       setErrorMsg(err?.message || 'Error de conexión. Probá de nuevo.');
+      setLoading(false);
+    }
+  };
+
+  const handleBioLogin = async () => {
+    setErrorMsg('');
+    setLoading(true);
+    try {
+      const creds = await bioLogin();
+      if (!creds) { setErrorMsg('No se pudo leer la huella. Entrá con tus datos.'); setLoading(false); return; }
+      const r = await doLogin(creds.codigo, creds.usuario, creds.password, creds.role);
+      if (!r.ok) { setErrorMsg((r.msg || 'No se pudo entrar') + ' — volvé a ingresar tus datos.'); setLoading(false); return; }
+    } catch (err: any) {
+      setErrorMsg('Huella cancelada o no disponible en este dispositivo.');
       setLoading(false);
     }
   };
@@ -95,6 +123,24 @@ export default function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps)
             <Users size={15} /> Colaborador
           </button>
         </div>
+
+        {bioAvail && bioOn && (
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={handleBioLogin}
+              disabled={loading}
+              className="w-full bg-brand-yellow hover:bg-brand-yellow/90 disabled:bg-stone-800 text-stone-900 font-display font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-md"
+            >
+              <Fingerprint size={16} /> Ingresar con huella / Face ID
+            </button>
+            <div className="flex items-center gap-2 my-3">
+              <span className="flex-1 h-px bg-stone-800" />
+              <span className="text-[10px] text-stone-500 uppercase">o con tus datos</span>
+              <span className="flex-1 h-px bg-stone-800" />
+            </div>
+          </div>
+        )}
 
         <form id="login-form" onSubmit={handleSubmit} className="space-y-4">
           <div className="bg-stone-950/50 p-4 rounded-2xl border border-stone-800 flex items-start gap-3">
@@ -159,6 +205,18 @@ export default function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps)
             <p className="text-xs text-brand-red bg-brand-red/10 border border-brand-red/20 p-3 rounded-xl font-semibold text-center">
               {errorMsg}
             </p>
+          )}
+
+          {bioAvail && !bioOn && (
+            <label className="flex items-start gap-2 text-[11px] text-stone-300 bg-stone-950/50 p-3 rounded-xl border border-stone-800 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={bioCheck}
+                onChange={(e) => setBioCheck(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-brand-orange"
+              />
+              <span>🔒 <strong className="text-white">Activar ingreso con huella / Face ID</strong> en este dispositivo, para no volver a tipear las credenciales.</span>
+            </label>
           )}
 
           <div className="flex gap-2 pt-1">
