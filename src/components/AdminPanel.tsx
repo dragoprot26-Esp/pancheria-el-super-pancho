@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { comprimirImagen } from '../img';
 import { Order, OrderStatus, AdminSettings, SalesMetrics, Product } from '../types';
 import { 
   ClipboardList, BarChart3, Settings2, Bell, Download, 
@@ -225,15 +226,7 @@ export default function AdminPanel({
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert('La imagen es demasiado grande. El límite es de 2MB para evitar saturar el almacenamiento.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProdImageBase64(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      comprimirImagen(file, 1000, 0.72).then((r) => { if (r) setProdImageBase64(r); });
     }
   };
 
@@ -2319,13 +2312,7 @@ export default function AdminPanel({
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
-                                if (file.size > 2 * 1024 * 1024) {
-                                  alert('La imagen es demasiado grande. El límite es de 2MB.');
-                                  return;
-                                }
-                                const reader = new FileReader();
-                                reader.onloadend = () => setThemeLogoImage(reader.result as string);
-                                reader.readAsDataURL(file);
+                                comprimirImagen(file, 800, 0.8).then((r) => { if (r) setThemeLogoImage(r); });
                               }
                             }}
                             className="block w-full text-xs text-stone-500 file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:font-semibold file:bg-stone-900 file:text-stone-100 hover:file:bg-stone-800 cursor-pointer"
@@ -2500,9 +2487,7 @@ export default function AdminPanel({
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => setThemeHeroImage1(reader.result as string);
-                                  reader.readAsDataURL(file);
+                                  comprimirImagen(file, 1400, 0.72).then((r) => { if (r) setThemeHeroImage1(r); });
                                 }
                               }}
                               className="block w-full text-xs text-stone-500 file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:font-semibold file:bg-stone-900 file:text-stone-100 hover:file:bg-stone-800 cursor-pointer"
@@ -2547,9 +2532,7 @@ export default function AdminPanel({
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => setThemeHeroImage2(reader.result as string);
-                                  reader.readAsDataURL(file);
+                                  comprimirImagen(file, 1400, 0.72).then((r) => { if (r) setThemeHeroImage2(r); });
                                 }
                               }}
                               className="block w-full text-xs text-stone-500 file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:font-semibold file:bg-stone-900 file:text-stone-100 hover:file:bg-stone-800 cursor-pointer"
