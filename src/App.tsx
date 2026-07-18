@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  cloudLoad, cloudSave, pancPublica, pancAgregarPedido,
+  cloudLoad, cloudSave, pancPublica, pancAgregarPedido, pancVersion,
   estaLogueado, miMembresia, signOut as cloudSignOut,
 } from './cloud';
 
@@ -150,7 +150,11 @@ export default function App() {
   useEffect(() => {
     if (!loggedAdmin || !cloudCode) return;
     if ('Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission(); } catch (e) {} }
+    let lastVer = '';
     const iv = setInterval(async () => {
+      const ver = await pancVersion(cloudCode);
+      if (!ver || ver === lastVer) return; // nada cambió → no baja imágenes
+      lastVer = ver;
       const remote = await cloudLoad(cloudCode);
       if (!remote || !Array.isArray(remote.orders)) return;
       setOrders(prev => {
@@ -159,7 +163,7 @@ export default function App() {
         if (nuevos.length) avisarNuevoPedido(nuevos.length);
         return nuevos.length ? [...nuevos, ...prev] : prev;
       });
-    }, 15000);
+    }, 30000);
     return () => clearInterval(iv);
   }, [loggedAdmin, cloudCode]);
 

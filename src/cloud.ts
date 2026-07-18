@@ -212,3 +212,8 @@ export async function pancAgregarPedido(codigo: string, pedido: any): Promise<vo
   try { await rpc('panc_agregar_pedido', { p_codigo: codigo, p_pedido: pedido }, false); }
   catch (e) { /* noop */ }
 }
+
+export async function pancVersion(codigo: string): Promise<string> {
+  try { const r = await rpc('panc_version', { p_codigo: codigo }, false); return typeof r === 'string' ? r : String(r || ''); }
+  catch (e) { return ''; }
+}
